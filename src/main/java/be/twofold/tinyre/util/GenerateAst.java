@@ -13,15 +13,15 @@ final class GenerateAst {
         }
 
         defineAst(args[0], "Re", Arrays.asList(
+            "Alternative   : List<Re> exprs",
             "AnyChar       : ",
+            "CharClass     : char identifier",
             "CharRange     : char min, char max",
             "Complement    : Re expr",
-            "Concatenation : Re left, Re right",
+            "Disjunction   : List<Re> exprs",
             "Intersection  : Re left, Re right",
             "Literal       : String s",
-            "Predefined    : char identifier",
-            "Repeat        : Re expr, int min, int max",
-            "Union         : Re left, Re right"
+            "Repeat        : Re expr, int min, int max"
         ));
     }
 
@@ -31,6 +31,8 @@ final class GenerateAst {
         try (PrintWriter writer = new PrintWriter(path)) {
 
             writer.println("package be.twofold.tinyre;");
+            writer.println();
+            writer.println("import java.util.*;");
             writer.println();
             writer.println("public abstract class " + baseName + " {");
             writer.println();

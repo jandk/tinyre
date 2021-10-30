@@ -1,29 +1,44 @@
 package be.twofold.tinyre;
 
+import java.util.*;
+
 public abstract class Re {
 
     public abstract <R> R accept(Visitor<R> visitor);
 
     public interface Visitor<R> {
 
+        R visitAlternative(Alternative re);
+
         R visitAnyChar(AnyChar re);
+
+        R visitCharClass(CharClass re);
 
         R visitCharRange(CharRange re);
 
         R visitComplement(Complement re);
 
-        R visitConcatenation(Concatenation re);
+        R visitDisjunction(Disjunction re);
 
         R visitIntersection(Intersection re);
 
         R visitLiteral(Literal re);
 
-        R visitPredefined(Predefined re);
-
         R visitRepeat(Repeat re);
 
-        R visitUnion(Union re);
+    }
 
+    public static class Alternative extends Re {
+        public final List<Re> exprs;
+
+        public Alternative(List<Re> exprs) {
+            this.exprs = exprs;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitAlternative(this);
+        }
     }
 
     public static class AnyChar extends Re {
@@ -34,6 +49,19 @@ public abstract class Re {
         @Override
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitAnyChar(this);
+        }
+    }
+
+    public static class CharClass extends Re {
+        public final char identifier;
+
+        public CharClass(char identifier) {
+            this.identifier = identifier;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitCharClass(this);
         }
     }
 
@@ -65,18 +93,16 @@ public abstract class Re {
         }
     }
 
-    public static class Concatenation extends Re {
-        public final Re left;
-        public final Re right;
+    public static class Disjunction extends Re {
+        public final List<Re> exprs;
 
-        public Concatenation(Re left, Re right) {
-            this.left = left;
-            this.right = right;
+        public Disjunction(List<Re> exprs) {
+            this.exprs = exprs;
         }
 
         @Override
         public <R> R accept(Visitor<R> visitor) {
-            return visitor.visitConcatenation(this);
+            return visitor.visitDisjunction(this);
         }
     }
 
@@ -108,19 +134,6 @@ public abstract class Re {
         }
     }
 
-    public static class Predefined extends Re {
-        public final char identifier;
-
-        public Predefined(char identifier) {
-            this.identifier = identifier;
-        }
-
-        @Override
-        public <R> R accept(Visitor<R> visitor) {
-            return visitor.visitPredefined(this);
-        }
-    }
-
     public static class Repeat extends Re {
         public final Re expr;
         public final int min;
@@ -135,21 +148,6 @@ public abstract class Re {
         @Override
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitRepeat(this);
-        }
-    }
-
-    public static class Union extends Re {
-        public final Re left;
-        public final Re right;
-
-        public Union(Re left, Re right) {
-            this.left = left;
-            this.right = right;
-        }
-
-        @Override
-        public <R> R accept(Visitor<R> visitor) {
-            return visitor.visitUnion(this);
         }
     }
 
