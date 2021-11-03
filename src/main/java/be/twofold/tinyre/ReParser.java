@@ -4,6 +4,8 @@ import java.util.*;
 
 public final class ReParser {
 
+    static final int Infinity = Integer.MAX_VALUE;
+
     private final String source;
     private int position;
 
@@ -43,8 +45,7 @@ public final class ReParser {
     }
 
     private Re term() {
-        Re expr = atom();
-        return quantifier(expr);
+        return quantifier(atom());
     }
 
     private Re atom() {
@@ -76,19 +77,19 @@ public final class ReParser {
             return new Re.Repeat(expr, 0, 1);
         }
         if (match('*')) {
-            return new Re.Repeat(expr, 0, Integer.MAX_VALUE);
+            return new Re.Repeat(expr, 0, Infinity);
         }
         if (match('+')) {
-            return new Re.Repeat(expr, 1, Integer.MAX_VALUE);
+            return new Re.Repeat(expr, 1, Infinity);
         }
         if (match('{')) {
             int min = digits(0);
-            int max = match(',') ? digits(Integer.MAX_VALUE) : min;
+            int max = match(',') ? digits(Infinity) : min;
             if (!match('}')) {
                 throw error("Expected '}'");
             }
             if (min > max) {
-                throw new ReException("Invalid quantifier range");
+                throw error("Invalid quantifier range");
             }
             return new Re.Repeat(expr, min, max);
         }
@@ -106,7 +107,7 @@ public final class ReParser {
         try {
             return Integer.parseInt(source.substring(start, position));
         } catch (NumberFormatException e) {
-            throw new ReException("Invalid quantifier range");
+            throw error("Invalid quantifier range");
         }
     }
 
@@ -150,15 +151,17 @@ public final class ReParser {
     }
 
     private Re characterClassEscape() {
-        if (peek("dDsSwW")) {
-            return new Re.CharClass(read());
-        }
-
         char ch = peek();
-        if ((ch >= 'a' && ch <= 'z') ||
-            (ch >= 'A' && ch <= 'Z') ||
-            (ch >= '0' && ch <= '9')
-        ) {
+        switch (ch) {
+            case 'D':
+            case 'S':
+            case 'W':
+            case 'd':
+            case 's':
+            case 'w':
+                return new Re.CharClass(read());
+        }
+        if (!Ascii.isAlnum(ch)) {
             throw error("Invalid escape");
         }
         return null;

@@ -2,6 +2,7 @@ package be.twofold.tinyre;
 
 import org.junit.jupiter.api.*;
 
+import static be.twofold.tinyre.ReParser.*;
 import static org.assertj.core.api.Assertions.*;
 
 class ReParserTest {
@@ -15,6 +16,8 @@ class ReParserTest {
             assertThat(literal.s).isEmpty();
         });
     }
+
+    // region Quantifier
 
     @Test
     void quantifierAcceptsQuestion() {
@@ -30,7 +33,7 @@ class ReParserTest {
         Re re = new ReParser("*").quantifier(all);
         assertThat(re).isInstanceOfSatisfying(Re.Repeat.class, repeat -> {
             assertThat(repeat.min).isEqualTo(0);
-            assertThat(repeat.max).isEqualTo(Integer.MAX_VALUE);
+            assertThat(repeat.max).isEqualTo(Infinity);
         });
     }
 
@@ -39,12 +42,12 @@ class ReParserTest {
         Re re = new ReParser("+").quantifier(all);
         assertThat(re).isInstanceOfSatisfying(Re.Repeat.class, repeat -> {
             assertThat(repeat.min).isEqualTo(1);
-            assertThat(repeat.max).isEqualTo(Integer.MAX_VALUE);
+            assertThat(repeat.max).isEqualTo(Infinity);
         });
     }
 
     @Test
-    void quantifierAcceptsMin() {
+    void quantifierAcceptsCount() {
         Re re = new ReParser("{2}").quantifier(all);
         assertThat(re).isInstanceOfSatisfying(Re.Repeat.class, repeat -> {
             assertThat(repeat.min).isEqualTo(2);
@@ -66,7 +69,7 @@ class ReParserTest {
         Re re = new ReParser("{2,}").quantifier(all);
         assertThat(re).isInstanceOfSatisfying(Re.Repeat.class, repeat -> {
             assertThat(repeat.min).isEqualTo(2);
-            assertThat(repeat.max).isEqualTo(Integer.MAX_VALUE);
+            assertThat(repeat.max).isEqualTo(Infinity);
         });
     }
 
@@ -100,9 +103,6 @@ class ReParserTest {
             .withMessage("Expected '}'");
     }
 
-    @Test
-    void classRangeAcceptsClasses() {
-        Re re = new ReParser("\\d").classRange();
-    }
+    // endregion
 
 }
