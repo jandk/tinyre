@@ -44,10 +44,7 @@ public final class ReParser {
 
     private Re term() {
         Re expr = atom();
-        if (peek("*+?{")) {
-            return quantifier(expr);
-        }
-        return expr;
+        return quantifier(expr);
     }
 
     private Re atom() {
@@ -75,43 +72,42 @@ public final class ReParser {
     }
 
     Re quantifier(Re expr) {
-        switch (read()) {
-            case '?':
-                return new Re.Repeat(expr, 0, 1);
-
-            case '*':
-                return new Re.Repeat(expr, 0, Integer.MAX_VALUE);
-
-            case '+':
-                return new Re.Repeat(expr, 1, Integer.MAX_VALUE);
-
-            case '{':
-                int min = digits();
-                if (min < 0) {
-                    throw error("Expected integer");
-                }
-
-                int max = match(',') ? digits() : min;
-                if (!match('}')) {
-                    throw error("Expected '}'");
-                }
-
-                return new Re.Repeat(expr, min, max >= 0 ? max : Integer.MAX_VALUE);
-
-            default:
-                throw new UnsupportedOperationException();
+        if (match('?')) {
+            return new Re.Repeat(expr, 0, 1);
         }
+        if (match('*')) {
+            return new Re.Repeat(expr, 0, Integer.MAX_VALUE);
+        }
+        if (match('+')) {
+            return new Re.Repeat(expr, 1, Integer.MAX_VALUE);
+        }
+        if (match('{')) {
+            int min = digits(0);
+            int max = match(',') ? digits(Integer.MAX_VALUE) : min;
+            if (!match('}')) {
+                throw error("Expected '}'");
+            }
+            if (min > max) {
+                throw new ReException("Invalid quantifier range");
+            }
+            return new Re.Repeat(expr, min, max);
+        }
+        return expr;
     }
 
-    private int digits() {
+    private int digits(int defaultValue) {
         int start = position;
-        while (peek("0123456789")) {
-            read();
+        while (Ascii.isDigit(peek())) {
+            position++;
         }
         if (start == position) {
-            return -1;
+            return defaultValue;
         }
-        return Integer.parseInt(source.substring(start, position));
+        try {
+            return Integer.parseInt(source.substring(start, position));
+        } catch (NumberFormatException e) {
+            throw new ReException("Invalid quantifier range");
+        }
     }
 
     private Re characterClass() {
@@ -175,7 +171,7 @@ public final class ReParser {
 
 
     private RuntimeException error(String message) {
-        return new ReParseException(message);
+        return new ReException(message);
     }
 
     private char peek() {
