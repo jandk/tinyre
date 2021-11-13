@@ -1,7 +1,5 @@
 package be.twofold.tinyre.ast;
 
-import be.twofold.tinyre.*;
-
 public final class CharClass extends Re {
     public final char identifier;
 
@@ -10,7 +8,7 @@ public final class CharClass extends Re {
     }
 
     @Override
-    public <R> R accept(Visitor<R> visitor) {
-        return visitor.visitCharClass(this);
+    void toString(StringBuilder builder) {
+        builder.append('\\').append(identifier);
     }
 }

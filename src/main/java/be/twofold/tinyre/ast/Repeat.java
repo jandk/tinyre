@@ -1,8 +1,8 @@
 package be.twofold.tinyre.ast;
 
-import be.twofold.tinyre.*;
-
 public final class Repeat extends Re {
+    public static final int Infinity = Integer.MAX_VALUE;
+
     public final Re expr;
     public final int min;
     public final int max;
@@ -14,7 +14,19 @@ public final class Repeat extends Re {
     }
 
     @Override
-    public <R> R accept(Visitor<R> visitor) {
-        return visitor.visitRepeat(this);
+    void toString(StringBuilder builder) {
+        expr.toString(builder);
+
+        if (min == 0 && max == 1) {
+            builder.append('?');
+        } else if (min == 0 && max == Infinity) {
+            builder.append('*');
+        } else if (min == 1 && max == Infinity) {
+            builder.append('+');
+        } else if (min == max) {
+            builder.append('{').append(min).append('}');
+        } else {
+            builder.append('{').append(min).append(',').append(max);
+        }
     }
 }

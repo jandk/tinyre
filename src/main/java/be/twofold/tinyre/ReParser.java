@@ -6,8 +6,6 @@ import java.util.*;
 
 public final class ReParser {
 
-    static final int Infinity = Integer.MAX_VALUE;
-
     private final String source;
     private int position;
 
@@ -95,16 +93,16 @@ public final class ReParser {
 
             case '*':
                 read();
-                return new Repeat(expr, 0, Infinity);
+                return new Repeat(expr, 0, Repeat.Infinity);
 
             case '+':
                 read();
-                return new Repeat(expr, 1, Infinity);
+                return new Repeat(expr, 1, Repeat.Infinity);
 
             case '{':
                 read();
                 int min = digits(0);
-                int max = match(',') ? digits(Infinity) : min;
+                int max = match(',') ? digits(Repeat.Infinity) : min;
                 if (!match('}')) {
                     throw error("Expected '}'");
                 }

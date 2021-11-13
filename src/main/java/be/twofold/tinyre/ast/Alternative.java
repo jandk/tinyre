@@ -1,7 +1,5 @@
 package be.twofold.tinyre.ast;
 
-import be.twofold.tinyre.*;
-
 import java.util.*;
 
 public final class Alternative extends Re {
@@ -12,7 +10,9 @@ public final class Alternative extends Re {
     }
 
     @Override
-    public <R> R accept(Visitor<R> visitor) {
-        return visitor.visitAlternative(this);
+    void toString(StringBuilder builder) {
+        for (Re expr : exprs) {
+            expr.toString(builder);
+        }
     }
 }

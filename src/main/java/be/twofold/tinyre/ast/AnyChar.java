@@ -1,7 +1,5 @@
 package be.twofold.tinyre.ast;
 
-import be.twofold.tinyre.*;
-
 public final class AnyChar extends Re {
     public static AnyChar Instance = new AnyChar();
 
@@ -9,7 +7,7 @@ public final class AnyChar extends Re {
     }
 
     @Override
-    public <R> R accept(Visitor<R> visitor) {
-        return visitor.visitAnyChar(this);
+    void toString(StringBuilder builder) {
+        builder.append('.');
     }
 }

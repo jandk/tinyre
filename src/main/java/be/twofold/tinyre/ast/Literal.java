@@ -1,7 +1,5 @@
 package be.twofold.tinyre.ast;
 
-import be.twofold.tinyre.*;
-
 public final class Literal extends Re {
     public final String value;
 
@@ -10,7 +8,7 @@ public final class Literal extends Re {
     }
 
     @Override
-    public <R> R accept(Visitor<R> visitor) {
-        return visitor.visitLiteral(this);
+    void toString(StringBuilder builder) {
+        builder.append(value);
     }
 }

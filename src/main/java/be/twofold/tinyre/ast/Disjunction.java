@@ -1,7 +1,5 @@
 package be.twofold.tinyre.ast;
 
-import be.twofold.tinyre.*;
-
 import java.util.*;
 
 public final class Disjunction extends Re {
@@ -12,7 +10,14 @@ public final class Disjunction extends Re {
     }
 
     @Override
-    public <R> R accept(Visitor<R> visitor) {
-        return visitor.visitDisjunction(this);
+    void toString(StringBuilder builder) {
+        builder.append('(');
+        Iterator<Re> iterator = exprs.iterator();
+        iterator.next().toString(builder);
+        while (iterator.hasNext()) {
+            iterator.next().toString(builder);
+            builder.append('|');
+        }
+        builder.append(')');
     }
 }

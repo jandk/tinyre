@@ -59,7 +59,7 @@ class ReParserTest {
         assertThat(parse("a*"))
             .isInstanceOfSatisfying(Repeat.class, repeat -> {
                 assertThat(repeat.min).isEqualTo(0);
-                assertThat(repeat.max).isEqualTo(ReParser.Infinity);
+                assertThat(repeat.max).isEqualTo(Repeat.Infinity);
             });
     }
 
@@ -68,7 +68,7 @@ class ReParserTest {
         assertThat(parse("a+"))
             .isInstanceOfSatisfying(Repeat.class, repeat -> {
                 assertThat(repeat.min).isEqualTo(1);
-                assertThat(repeat.max).isEqualTo(ReParser.Infinity);
+                assertThat(repeat.max).isEqualTo(Repeat.Infinity);
             });
     }
 
@@ -95,7 +95,7 @@ class ReParserTest {
         assertThat(parse("a{2,}"))
             .isInstanceOfSatisfying(Repeat.class, repeat -> {
                 assertThat(repeat.min).isEqualTo(2);
-                assertThat(repeat.max).isEqualTo(ReParser.Infinity);
+                assertThat(repeat.max).isEqualTo(Repeat.Infinity);
             });
     }
 
