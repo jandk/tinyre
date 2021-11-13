@@ -1,5 +1,7 @@
 package be.twofold.tinyre;
 
+import be.twofold.tinyre.ast.*;
+
 import java.util.*;
 
 public final class ReParser {
@@ -36,7 +38,7 @@ public final class ReParser {
         while (match('|')) {
             exprs.add(alternative());
         }
-        return new Re.Disjunction(exprs);
+        return new Disjunction(exprs);
     }
 
     private Re alternative() {
@@ -47,11 +49,11 @@ public final class ReParser {
 
         switch (exprs.size()) {
             case 0:
-                return new Re.Literal("");
+                return new Literal("");
             case 1:
                 return exprs.get(0);
             default:
-                return new Re.Alternative(exprs);
+                return new Alternative(exprs);
         }
     }
 
@@ -71,7 +73,7 @@ public final class ReParser {
 
             case '.':
                 read();
-                return new Re.AnyChar();
+                return AnyChar.Instance;
 
             case '[':
                 throw new UnsupportedOperationException();
@@ -89,15 +91,15 @@ public final class ReParser {
         switch (peek()) {
             case '?':
                 read();
-                return new Re.Repeat(expr, 0, 1);
+                return new Repeat(expr, 0, 1);
 
             case '*':
                 read();
-                return new Re.Repeat(expr, 0, Infinity);
+                return new Repeat(expr, 0, Infinity);
 
             case '+':
                 read();
-                return new Re.Repeat(expr, 1, Infinity);
+                return new Repeat(expr, 1, Infinity);
 
             case '{':
                 read();
@@ -109,7 +111,7 @@ public final class ReParser {
                 if (min > max) {
                     throw error("Invalid quantifier range");
                 }
-                return new Re.Repeat(expr, min, max);
+                return new Repeat(expr, min, max);
 
             default:
                 return expr;
@@ -135,15 +137,15 @@ public final class ReParser {
         char ch = read();
         switch (ch) {
             case 'D':
-                return new Re.CharClass('D');
+                return new CharClass('D');
             case 'S':
-                return new Re.CharClass('S');
+                return new CharClass('S');
             case 'W':
-                return new Re.CharClass('W');
+                return new CharClass('W');
             case 'a':
                 return literal('\u0007');
             case 'd':
-                return new Re.CharClass('d');
+                return new CharClass('d');
             case 'e':
                 return literal('\u001b');
             case 'f':
@@ -153,13 +155,13 @@ public final class ReParser {
             case 'r':
                 return literal('\r');
             case 's':
-                return new Re.CharClass('s');
+                return new CharClass('s');
             case 't':
                 return literal('\t');
             case 'u':
                 return literal(readHex(4));
             case 'w':
-                return new Re.CharClass('w');
+                return new CharClass('w');
             case 'x':
                 return literal(readHex(2));
 
@@ -184,8 +186,8 @@ public final class ReParser {
         return (char) result;
     }
 
-    private Re.Literal literal(char ch) {
-        return new Re.Literal(String.valueOf(ch));
+    private Literal literal(char ch) {
+        return new Literal(String.valueOf(ch));
     }
 
     // region Helpers

@@ -1,5 +1,6 @@
 package be.twofold.tinyre;
 
+import be.twofold.tinyre.ast.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.*;
 import org.junit.jupiter.params.provider.*;
@@ -14,8 +15,8 @@ class ReParserTest {
     @Test
     void parseAcceptsEmptyString() {
         assertThat(parse(""))
-            .isInstanceOfSatisfying(Re.Literal.class, literal -> {
-                assertThat(literal.s).isEmpty();
+            .isInstanceOfSatisfying(Literal.class, literal -> {
+                assertThat(literal.value).isEmpty();
             });
     }
 
@@ -23,15 +24,15 @@ class ReParserTest {
     @Test
     void parseSingleCharacter() {
         assertThat(parse("a"))
-            .isInstanceOfSatisfying(Re.Literal.class, literal -> {
-                assertThat(literal.s).isEqualTo("a");
+            .isInstanceOfSatisfying(Literal.class, literal -> {
+                assertThat(literal.value).isEqualTo("a");
             });
     }
 
     @Test
     void parseDisjunction() {
         assertThat(parse("a|b|c"))
-            .isInstanceOfSatisfying(Re.Disjunction.class, disjunction -> {
+            .isInstanceOfSatisfying(Disjunction.class, disjunction -> {
                 assertThat(disjunction.exprs).hasSize(3);
             });
     }
@@ -39,7 +40,7 @@ class ReParserTest {
     @Test
     void parseAlternative() {
         assertThat(parse("abc"))
-            .isInstanceOfSatisfying(Re.Alternative.class, alternative -> {
+            .isInstanceOfSatisfying(Alternative.class, alternative -> {
                 assertThat(alternative.exprs).hasSize(3);
             });
     }
@@ -47,7 +48,7 @@ class ReParserTest {
     @Test
     void parseQuantifierQuestion() {
         assertThat(parse("a?"))
-            .isInstanceOfSatisfying(Re.Repeat.class, repeat -> {
+            .isInstanceOfSatisfying(Repeat.class, repeat -> {
                 assertThat(repeat.min).isEqualTo(0);
                 assertThat(repeat.max).isEqualTo(1);
             });
@@ -56,7 +57,7 @@ class ReParserTest {
     @Test
     void parseQuantifierStar() {
         assertThat(parse("a*"))
-            .isInstanceOfSatisfying(Re.Repeat.class, repeat -> {
+            .isInstanceOfSatisfying(Repeat.class, repeat -> {
                 assertThat(repeat.min).isEqualTo(0);
                 assertThat(repeat.max).isEqualTo(ReParser.Infinity);
             });
@@ -65,7 +66,7 @@ class ReParserTest {
     @Test
     void parseQuantifierPlus() {
         assertThat(parse("a+"))
-            .isInstanceOfSatisfying(Re.Repeat.class, repeat -> {
+            .isInstanceOfSatisfying(Repeat.class, repeat -> {
                 assertThat(repeat.min).isEqualTo(1);
                 assertThat(repeat.max).isEqualTo(ReParser.Infinity);
             });
@@ -74,7 +75,7 @@ class ReParserTest {
     @Test
     void parseQuantifierCount() {
         assertThat(parse("a{2}"))
-            .isInstanceOfSatisfying(Re.Repeat.class, repeat -> {
+            .isInstanceOfSatisfying(Repeat.class, repeat -> {
                 assertThat(repeat.min).isEqualTo(2);
                 assertThat(repeat.max).isEqualTo(2);
             });
@@ -83,7 +84,7 @@ class ReParserTest {
     @Test
     void parseQuantifierMinMax() {
         assertThat(parse("a{2,3}"))
-            .isInstanceOfSatisfying(Re.Repeat.class, repeat -> {
+            .isInstanceOfSatisfying(Repeat.class, repeat -> {
                 assertThat(repeat.min).isEqualTo(2);
                 assertThat(repeat.max).isEqualTo(3);
             });
@@ -92,7 +93,7 @@ class ReParserTest {
     @Test
     void parseQuantifierMinOnly() {
         assertThat(parse("a{2,}"))
-            .isInstanceOfSatisfying(Re.Repeat.class, repeat -> {
+            .isInstanceOfSatisfying(Repeat.class, repeat -> {
                 assertThat(repeat.min).isEqualTo(2);
                 assertThat(repeat.max).isEqualTo(ReParser.Infinity);
             });
@@ -101,7 +102,7 @@ class ReParserTest {
     @Test
     void parseQuantifierMaxOnly() {
         assertThat(parse("a{,3}"))
-            .isInstanceOfSatisfying(Re.Repeat.class, repeat -> {
+            .isInstanceOfSatisfying(Repeat.class, repeat -> {
                 assertThat(repeat.min).isEqualTo(0);
                 assertThat(repeat.max).isEqualTo(3);
             });
@@ -110,22 +111,22 @@ class ReParserTest {
     @Test
     void parseAtomParentheses() {
         assertThat(parse("(a)"))
-            .isInstanceOfSatisfying(Re.Literal.class, literal -> {
-                assertThat(literal.s).isEqualTo("a");
+            .isInstanceOfSatisfying(Literal.class, literal -> {
+                assertThat(literal.value).isEqualTo("a");
             });
     }
 
     @Test
     void parseAtomAnyChar() {
         assertThat(parse("."))
-            .isInstanceOf(Re.AnyChar.class);
+            .isInstanceOf(AnyChar.class);
     }
 
     @ParameterizedTest
     @ValueSource(chars = {'d', 'D', 's', 'S', 'w', 'W'})
     void parseEscapeClasses(char input) {
         assertThat(parse("\\" + input))
-            .isInstanceOfSatisfying(Re.CharClass.class, charClass -> {
+            .isInstanceOfSatisfying(CharClass.class, charClass -> {
                 assertThat(charClass.identifier).isEqualTo(input);
             });
     }
@@ -134,32 +135,32 @@ class ReParserTest {
     @MethodSource("provideArgumentsForParseEscapeCharacters")
     void parseEscapeCharacters(String input, String expected) {
         assertThat(parse("\\" + input))
-            .isInstanceOfSatisfying(Re.Literal.class, charClass -> {
-                assertThat(charClass.s).isEqualTo(expected);
+            .isInstanceOfSatisfying(Literal.class, charClass -> {
+                assertThat(charClass.value).isEqualTo(expected);
             });
     }
 
     @Test
     void parseEscapeHex() {
         assertThat(parse("\\x42"))
-            .isInstanceOfSatisfying(Re.Literal.class, charClass -> {
-                assertThat(charClass.s).isEqualTo("B");
+            .isInstanceOfSatisfying(Literal.class, charClass -> {
+                assertThat(charClass.value).isEqualTo("B");
             });
     }
 
     @Test
     void parseEscapeUnicode() {
         assertThat(parse("\\u20ac"))
-            .isInstanceOfSatisfying(Re.Literal.class, charClass -> {
-                assertThat(charClass.s).isEqualTo("\u20ac");
+            .isInstanceOfSatisfying(Literal.class, charClass -> {
+                assertThat(charClass.value).isEqualTo("\u20ac");
             });
     }
 
     @Test
     void parseEscapeBackslash() {
         assertThat(parse("\\-"))
-            .isInstanceOfSatisfying(Re.Literal.class, charClass -> {
-                assertThat(charClass.s).isEqualTo("-");
+            .isInstanceOfSatisfying(Literal.class, charClass -> {
+                assertThat(charClass.value).isEqualTo("-");
             });
     }
 
